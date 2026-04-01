@@ -187,6 +187,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [feedbackName, setFeedbackName] = useState("");
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
@@ -325,6 +326,75 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* --- Item Modal --- */}
+      <AnimatePresence>
+        {selectedItem && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedItem(null)}
+              className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-md"
+            />
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto relative"
+              >
+                <button 
+                  onClick={() => setSelectedItem(null)}
+                  className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-md hover:bg-white rounded-full text-[#6F4E37] shadow-lg transition-all"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="aspect-video overflow-hidden">
+                  <img 
+                    src={selectedItem.image} 
+                    alt={selectedItem.name[lang]} 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-[#D4A373] text-xs font-bold uppercase tracking-widest">
+                        {selectedItem.category === 'coffee' && <Coffee size={14} />}
+                        {selectedItem.category === 'juice' && <GlassWater size={14} />}
+                        {selectedItem.category === 'food' && <Utensils size={14} />}
+                        {t[selectedItem.category]}
+                      </div>
+                      <h2 className="text-2xl font-bold text-[#4A3728]">{selectedItem.name[lang]}</h2>
+                    </div>
+                    <div className="text-xl font-bold text-[#6F4E37] whitespace-nowrap">
+                      {selectedItem.price} {t.priceSuffix}
+                    </div>
+                  </div>
+
+                  <p className="text-[#A68A64] leading-relaxed">
+                    {selectedItem.description[lang]}
+                  </p>
+
+                  <div className="pt-4">
+                    <button 
+                      onClick={() => setSelectedItem(null)}
+                      className="w-full py-4 bg-[#6F4E37] text-white font-bold rounded-2xl hover:bg-[#5D4037] transition-all shadow-lg shadow-[#6F4E37]/20"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         
         {/* --- Hero / Categories --- */}
@@ -371,7 +441,8 @@ export default function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   whileHover={{ y: -5 }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group"
+                  onClick={() => setSelectedItem(item)}
+                  className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img 
