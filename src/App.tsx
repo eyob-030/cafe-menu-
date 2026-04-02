@@ -633,7 +633,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 z-[100] p-4 bg-[#6F4E37] text-white rounded-full shadow-2xl hover:bg-[#5D4037] active:scale-90 transition-all group"
+            className="fixed bottom-24 right-8 z-[100] p-4 bg-[#6F4E37] text-white rounded-full shadow-2xl hover:bg-[#5D4037] active:scale-90 transition-all group"
             aria-label="Go to top"
           >
             <ChevronUp size={24} className="group-hover:-translate-y-1 transition-transform" />
