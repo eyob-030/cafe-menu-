@@ -183,6 +183,17 @@ const TRANSLATIONS = {
 
 // --- Components ---
 
+const SkeletonCard = () => (
+  <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] animate-pulse">
+    <div className="aspect-[4/3] bg-[#F5EBE0]" />
+    <div className="p-4 space-y-3">
+      <div className="h-4 bg-[#F5EBE0] rounded w-3/4" />
+      <div className="h-3 bg-[#F5EBE0] rounded w-full" />
+      <div className="h-3 bg-[#F5EBE0] rounded w-5/6" />
+    </div>
+  </div>
+);
+
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -193,8 +204,16 @@ export default function App() {
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
   const [showGoToTop, setShowGoToTop] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const t = TRANSLATIONS[lang];
+
+  useEffect(() => {
+    // Initial load and filter changes simulation
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, [activeCategory, searchQuery, lang]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -443,42 +462,56 @@ export default function App() {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
           >
             <AnimatePresence mode='popLayout'>
-              {filteredItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ y: -5 }}
-                  onClick={() => setSelectedItem(item)}
-                  className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img 
-                      src={item.image} 
-                      alt={item.name[lang]} 
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#6F4E37] shadow-sm">
-                      {item.price} {t.priceSuffix}
+              {isLoading ? (
+                // Skeleton loading state
+                Array.from({ length: 8 }).map((_, i) => (
+                  <motion.div
+                    key={`skeleton-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <SkeletonCard />
+                  </motion.div>
+                ))
+              ) : (
+                filteredItems.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ y: -5 }}
+                    onClick={() => setSelectedItem(item)}
+                    className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.name[lang]} 
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#6F4E37] shadow-sm">
+                        {item.price} {t.priceSuffix}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4 space-y-1">
-                    <h3 className="font-bold text-[#4A3728] group-hover:text-[#D4A373] transition-colors">
-                      {item.name[lang]}
-                    </h3>
-                    <p className="text-xs text-[#A68A64] line-clamp-2 leading-relaxed">
-                      {item.description[lang]}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="p-4 space-y-1">
+                      <h3 className="font-bold text-[#4A3728] group-hover:text-[#D4A373] transition-colors">
+                        {item.name[lang]}
+                      </h3>
+                      <p className="text-xs text-[#A68A64] line-clamp-2 leading-relaxed">
+                        {item.description[lang]}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </AnimatePresence>
           </motion.div>
 
-          {filteredItems.length === 0 && (
+          {!isLoading && filteredItems.length === 0 && (
             <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-[#E6D5C3]">
               <Search size={48} className="mx-auto text-[#E6D5C3] mb-4" />
               <p className="text-[#A68A64] font-medium">No items found matching your search.</p>
