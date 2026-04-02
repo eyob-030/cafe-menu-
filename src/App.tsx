@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Globe,
   ChevronRight,
+  ChevronUp,
   MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -191,8 +192,17 @@ export default function App() {
   const [feedbackName, setFeedbackName] = useState("");
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
+  const [showGoToTop, setShowGoToTop] = useState(false);
 
   const t = TRANSLATIONS[lang];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowGoToTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const filteredItems = useMemo(() => {
     return MENU_DATA.filter(item => {
@@ -614,6 +624,22 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* --- Go to Top Button --- */}
+      <AnimatePresence>
+        {showGoToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-8 right-8 z-[100] p-4 bg-[#6F4E37] text-white rounded-full shadow-2xl hover:bg-[#5D4037] active:scale-90 transition-all group"
+            aria-label="Go to top"
+          >
+            <ChevronUp size={24} className="group-hover:-translate-y-1 transition-transform" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* --- Custom Scrollbar Styles --- */}
       <style>{`
