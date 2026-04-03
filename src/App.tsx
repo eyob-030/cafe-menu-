@@ -253,7 +253,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#4A3728] font-sans selection:bg-[#D4A373] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#FDFBF7] text-[#4A3728] font-sans selection:bg-[#D4A373] selection:text-white">
       
       {/* --- Navbar --- */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E6D5C3] px-4 py-3 flex items-center justify-between shadow-sm">
@@ -425,7 +425,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+      <main className="flex-grow max-w-7xl mx-auto px-4 py-8 space-y-12">
         
         {/* --- Hero / Categories --- */}
         <section id="menu" className="space-y-6">
