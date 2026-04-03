@@ -21,6 +21,7 @@ import {
   Globe,
   ChevronRight,
   ChevronUp,
+  Check,
   MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -574,21 +575,40 @@ export default function App() {
                   className="w-full px-4 py-3 bg-[#FDFBF7] border border-[#E6D5C3] rounded-xl outline-none focus:border-[#D4A373] transition-all resize-none"
                 />
               </div>
-              <button 
+              <motion.button 
                 type="submit"
-                className="w-full py-4 bg-[#6F4E37] text-white font-bold rounded-xl hover:bg-[#5D4037] active:scale-[0.98] transition-all shadow-lg shadow-[#6F4E37]/20"
+                whileTap={{ scale: 0.95 }}
+                disabled={showFeedbackSuccess}
+                className={`w-full py-4 font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  showFeedbackSuccess 
+                  ? 'bg-green-600 text-white shadow-green-600/20' 
+                  : 'bg-[#6F4E37] text-white hover:bg-[#5D4037] shadow-[#6F4E37]/20'
+                }`}
               >
-                {t.submit}
-              </button>
-              {showFeedbackSuccess && (
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center text-green-600 text-sm font-medium"
-                >
-                  {t.feedbackSuccess}
-                </motion.p>
-              )}
+                <AnimatePresence mode="wait">
+                  {showFeedbackSuccess ? (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex items-center gap-2"
+                    >
+                      <Check size={20} />
+                      {t.feedbackSuccess}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="idle"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      {t.submit}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             </form>
           </section>
 
