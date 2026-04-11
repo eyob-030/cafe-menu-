@@ -265,8 +265,19 @@ export default function App() {
           >
             <MenuIcon size={24} />
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-[#6F4E37] hidden sm:block">
-            {t.cafeName}
+          <h1 className="text-xl font-bold tracking-tight text-[#6F4E37] hidden sm:block overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={lang}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="block"
+              >
+                {t.cafeName}
+              </motion.span>
+            </AnimatePresence>
           </h1>
         </div>
 
@@ -430,9 +441,19 @@ export default function App() {
         {/* --- Hero / Categories --- */}
         <section id="menu" className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-bold text-[#4A3728] mb-2">{t.menu}</h2>
-              <p className="text-[#A68A64] max-w-md">{t.categories}</p>
+            <div className="overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={lang}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 20, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="text-3xl font-bold text-[#4A3728] mb-2">{t.menu}</h2>
+                  <p className="text-[#A68A64] max-w-md">{t.categories}</p>
+                </motion.div>
+              </AnimatePresence>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
               {[
@@ -441,18 +462,30 @@ export default function App() {
                 { id: 'juice', label: t.juice, icon: GlassWater },
                 { id: 'food', label: t.food, icon: Utensils },
               ].map((cat) => (
-                <button
+                <motion.button
                   key={cat.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setActiveCategory(cat.id)}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                     activeCategory === cat.id 
-                    ? 'bg-[#6F4E37] text-white shadow-lg shadow-[#6F4E37]/20 scale-105' 
+                    ? 'bg-[#6F4E37] text-white shadow-lg shadow-[#6F4E37]/20' 
                     : 'bg-white border border-[#E6D5C3] text-[#A68A64] hover:border-[#D4A373] hover:text-[#D4A373]'
                   }`}
                 >
                   <cat.icon size={16} />
-                  {cat.label}
-                </button>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={lang}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {cat.label}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -523,14 +556,28 @@ export default function App() {
         {/* --- Reviews Section --- */}
         <section id="reviews" className="bg-[#F5EBE0]/30 rounded-[2.5rem] p-8 sm:p-12 space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-[#4A3728]">{t.reviews}</h2>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={lang}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h2 className="text-3xl font-bold text-[#4A3728]">{t.reviews}</h2>
+              </motion.div>
+            </AnimatePresence>
             <div className="flex justify-center gap-1 text-[#D4A373]">
               {[1, 2, 3, 4, 5].map(i => <Star key={i} size={20} fill="currentColor" />)}
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {REVIEWS.map((review) => (
-              <div key={review.id} className="bg-white p-6 rounded-2xl shadow-sm border border-[#E6D5C3] space-y-4">
+              <motion.div 
+                key={review.id} 
+                layout
+                className="bg-white p-6 rounded-2xl shadow-sm border border-[#E6D5C3] space-y-4"
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-sm text-[#6F4E37]">{review.name}</span>
                   <div className="flex gap-0.5 text-[#D4A373]">
@@ -539,10 +586,19 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <p className="text-sm italic text-[#4A3728] leading-relaxed">
-                  "{review.comment[lang]}"
-                </p>
-              </div>
+                <AnimatePresence mode="wait">
+                  <motion.p 
+                    key={lang}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-sm italic text-[#4A3728] leading-relaxed"
+                  >
+                    "{review.comment[lang]}"
+                  </motion.p>
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </section>
