@@ -527,7 +527,16 @@ export default function App() {
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#6F4E37] shadow-sm">
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-[#6F4E37]/80 backdrop-blur-sm flex flex-col justify-center p-6 text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                        <p className="text-xs sm:text-sm font-medium leading-relaxed mb-2 line-clamp-4">
+                          {item.description[lang]}
+                        </p>
+                        <p className="text-base sm:text-lg font-bold">
+                          {item.price} {t.priceSuffix}
+                        </p>
+                      </div>
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#6F4E37] shadow-sm group-hover:opacity-0 transition-opacity">
                         {item.price} {t.priceSuffix}
                       </div>
                     </div>
