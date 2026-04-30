@@ -25,6 +25,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import QuickPinchZoom, { make3dTransformValue } from 'react-quick-pinch-zoom';
 
 // --- Types ---
 type Language = 'en' | 'am';
@@ -206,6 +207,7 @@ export default function App() {
   const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
   const [showGoToTop, setShowGoToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const t = TRANSLATIONS[lang];
 
@@ -222,6 +224,17 @@ export default function App() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setZoomedImage(null);
+        setSelectedItem(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -392,13 +405,17 @@ export default function App() {
                   <X size={20} />
                 </button>
 
-                <div className="aspect-video overflow-hidden">
+                <div className="aspect-video overflow-hidden cursor-zoom-in group">
                   <img 
                     src={selectedItem.image} 
                     alt={selectedItem.name[lang]} 
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onClick={() => setZoomedImage(selectedItem.image)}
                   />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+                     <Search className="text-white" size={32} />
+                  </div>
                 </div>
 
                 <div className="p-8 space-y-6">
@@ -520,7 +537,13 @@ export default function App() {
                     onClick={() => setSelectedItem(item)}
                     className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden">
+                    <div 
+                      className="relative aspect-[4/3] overflow-hidden cursor-zoom-in"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setZoomedImage(item.image);
+                      }}
+                    >
                       <img 
                         src={item.image} 
                         alt={item.name[lang]} 
@@ -756,6 +779,64 @@ export default function App() {
           >
             <ChevronUp size={24} className="group-hover:-translate-y-1 transition-transform" />
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* --- Zoomed Image Overlay --- */}
+      <AnimatePresence>
+        {zoomedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center overflow-hidden touch-none"
+            onClick={() => setZoomedImage(null)}
+          >
+            <motion.button 
+              initial={{ opacity: 0, scale: 0.5, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoomedImage(null);
+              }}
+              className="absolute top-6 right-6 z-[210] p-4 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all border border-white/20"
+            >
+              <X size={24} />
+            </motion.button>
+
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <QuickPinchZoom
+                onUpdate={({ x, y, scale }) => {
+                  const el = document.getElementById('zoom-img-target');
+                  if (el) {
+                    el.style.transform = make3dTransformValue({ x, y, scale });
+                  }
+                }}
+                tapZoomFactor={2}
+                draggableUnZoomed={false}
+              >
+                <div 
+                  className="flex items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <motion.img
+                    id="zoom-img-target"
+                    src={zoomedImage}
+                    alt="Zoomed menu item"
+                    referrerPolicy="no-referrer"
+                    className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl will-change-transform"
+                    style={{
+                      userSelect: 'none',
+                    }}
+                  />
+                </div>
+              </QuickPinchZoom>
+            </div>
+
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/60 text-sm font-medium whitespace-nowrap bg-white/5 px-6 py-2 rounded-full backdrop-blur-sm border border-white/10 pointer-events-none">
+              Pinch to zoom • Drag to pan • Esc to close
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
