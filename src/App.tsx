@@ -185,6 +185,22 @@ const TRANSLATIONS = {
 
 // --- Components ---
 
+const StarRating = ({ rating, size = 12 }: { rating: number, size?: number }) => {
+  return (
+    <div className="flex gap-0.5 text-[#D4A373]">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star 
+          key={i} 
+          size={size} 
+          fill={i < rating ? "currentColor" : "none"} 
+          stroke={i < rating ? "none" : "currentColor"}
+          className={i >= rating ? "opacity-30" : ""}
+        />
+      ))}
+    </div>
+  );
+};
+
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] animate-pulse">
     <div className="aspect-[4/3] bg-[#F5EBE0]" />
@@ -599,8 +615,8 @@ export default function App() {
                 <h2 className="text-3xl font-bold text-[#4A3728]">{t.reviews}</h2>
               </motion.div>
             </AnimatePresence>
-            <div className="flex justify-center gap-1 text-[#D4A373]">
-              {[1, 2, 3, 4, 5].map(i => <Star key={i} size={20} fill="currentColor" />)}
+            <div className="flex justify-center mt-2">
+              <StarRating rating={5} size={20} />
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
@@ -612,11 +628,7 @@ export default function App() {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-sm text-[#6F4E37]">{review.name}</span>
-                  <div className="flex gap-0.5 text-[#D4A373]">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={i} size={12} fill="currentColor" />
-                    ))}
-                  </div>
+                  <StarRating rating={review.rating} />
                 </div>
                 <AnimatePresence mode="wait">
                   <motion.p 
