@@ -630,9 +630,14 @@ export default function App() {
                     key={item.id}
                     layout
                     variants={itemVariants}
-                    whileHover={{ y: -5 }}
+                    whileHover={{ 
+                      y: -8, 
+                      scale: 1.02,
+                      boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     onClick={() => setSelectedItem(item)}
-                    className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] dark:border-[#2D1F15] group cursor-pointer"
+                    className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md transition-all border border-[#F5EBE0] dark:border-[#2D1F15] group cursor-pointer"
                   >
                     <div 
                       className="relative aspect-[4/3] overflow-hidden cursor-zoom-in"
