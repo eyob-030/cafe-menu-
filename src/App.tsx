@@ -46,6 +46,42 @@ interface Review {
   comment: { en: string; am: string };
 }
 
+// --- Animation Variants ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 80,
+      damping: 12
+    }
+  }
+};
+
+const sectionVariants = {
+  hidden: { y: 50, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+};
+
 // --- Sample Data ---
 const MENU_DATA: MenuItem[] = [
   {
@@ -285,7 +321,12 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#FDFBF7] text-[#4A3728] font-sans selection:bg-[#D4A373] selection:text-white">
       
       {/* --- Navbar --- */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E6D5C3] px-4 py-3 flex items-center justify-between shadow-sm">
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E6D5C3] px-4 py-3 flex items-center justify-between shadow-sm"
+      >
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsSidebarOpen(true)}
@@ -328,7 +369,7 @@ export default function App() {
           <Globe size={14} />
           {lang === 'en' ? 'አማርኛ' : 'English'}
         </button>
-      </header>
+      </motion.header>
 
       {/* --- Sidebar --- */}
       <AnimatePresence>
@@ -358,24 +399,30 @@ export default function App() {
                 </button>
               </div>
 
-              <nav className="flex flex-col gap-2 flex-1">
+              <motion.nav 
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-col gap-2 flex-1"
+              >
                 {[
                   { id: 'menu', label: t.menu, icon: Utensils },
                   { id: 'feedback', label: t.feedback, icon: MessageSquare },
                   { id: 'reviews', label: t.reviews, icon: Star },
                   { id: 'contact', label: t.contactUs, icon: Phone },
                 ].map((item) => (
-                  <button
+                  <motion.button
                     key={item.id}
+                    variants={itemVariants}
                     onClick={() => scrollToSection(item.id)}
                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5EBE0] text-[#4A3728] font-medium transition-all group"
                   >
                     <item.icon size={20} className="text-[#D4A373] group-hover:scale-110 transition-transform" />
                     {item.label}
                     <ChevronRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
+                  </motion.button>
                 ))}
-              </nav>
+              </motion.nav>
 
               <div className="pt-6 border-t border-[#E6D5C3]">
                 <p className="text-xs font-bold uppercase tracking-widest text-[#A68A64] mb-4">{t.socials}</p>
@@ -472,7 +519,14 @@ export default function App() {
       <main className="flex-grow max-w-7xl mx-auto px-4 py-8 space-y-12">
         
         {/* --- Hero / Categories --- */}
-        <section id="menu" className="space-y-6">
+        <motion.section 
+          id="menu" 
+          className="space-y-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={sectionVariants}
+        >
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="overflow-hidden">
               <AnimatePresence mode="wait">
@@ -526,6 +580,9 @@ export default function App() {
           {/* --- Menu Grid --- */}
           <motion.div 
             layout
+            variants={containerVariants}
+            initial="hidden"
+            animate={isLoading ? "hidden" : "visible"}
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
           >
             <AnimatePresence mode='popLayout'>
@@ -534,9 +591,7 @@ export default function App() {
                 Array.from({ length: 8 }).map((_, i) => (
                   <motion.div
                     key={`skeleton-${i}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    variants={itemVariants}
                   >
                     <SkeletonCard />
                   </motion.div>
@@ -546,9 +601,7 @@ export default function App() {
                   <motion.div
                     key={item.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
+                    variants={itemVariants}
                     whileHover={{ y: -5 }}
                     onClick={() => setSelectedItem(item)}
                     className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
@@ -599,10 +652,17 @@ export default function App() {
               <p className="text-[#A68A64] font-medium">No items found matching your search.</p>
             </div>
           )}
-        </section>
+        </motion.section>
 
         {/* --- Reviews Section --- */}
-        <section id="reviews" className="bg-[#F5EBE0]/30 rounded-[2.5rem] p-8 sm:p-12 space-y-8">
+        <motion.section 
+          id="reviews" 
+          className="bg-[#F5EBE0]/30 rounded-[2.5rem] p-8 sm:p-12 space-y-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={sectionVariants}
+        >
           <div className="text-center space-y-2">
             <AnimatePresence mode="wait">
               <motion.div
@@ -619,11 +679,15 @@ export default function App() {
               <StarRating rating={5} size={20} />
             </div>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6">
+          <motion.div 
+            variants={containerVariants}
+            className="grid sm:grid-cols-3 gap-6"
+          >
             {REVIEWS.map((review) => (
               <motion.div 
                 key={review.id} 
                 layout
+                variants={itemVariants}
                 className="bg-white p-6 rounded-2xl shadow-sm border border-[#E6D5C3] space-y-4"
               >
                 <div className="flex items-center justify-between">
@@ -644,11 +708,17 @@ export default function App() {
                 </AnimatePresence>
               </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* --- Feedback & Contact --- */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <motion.div 
+          className="grid md:grid-cols-2 gap-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={sectionVariants}
+        >
           <section id="feedback" className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#F5EBE0] space-y-6">
             <h2 className="text-2xl font-bold text-[#4A3728] flex items-center gap-3">
               <MessageSquare className="text-[#D4A373]" />
@@ -752,11 +822,17 @@ export default function App() {
               </div>
             </div>
           </section>
-        </div>
+        </motion.div>
       </main>
 
       {/* --- Footer --- */}
-      <footer className="bg-white border-t border-[#E6D5C3] mt-20 py-12">
+      <motion.footer 
+        className="bg-white border-t border-[#E6D5C3] mt-20 py-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        viewport={{ once: true }}
+      >
         <div className="max-w-7xl mx-auto px-4 grid sm:grid-cols-3 gap-8 items-center text-center sm:text-left">
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-[#6F4E37]">{t.cafeName}</h3>
@@ -776,7 +852,7 @@ export default function App() {
             <p className="text-lg font-bold text-[#6F4E37]">+251 911 123 456</p>
           </div>
         </div>
-      </footer>
+      </motion.footer>
 
       {/* --- Go to Top Button --- */}
       <AnimatePresence>
