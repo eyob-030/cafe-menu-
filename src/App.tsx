@@ -22,6 +22,8 @@ import {
   ChevronRight,
   ChevronUp,
   Check,
+  Sun,
+  Moon,
   MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -238,12 +240,12 @@ const StarRating = ({ rating, size = 12 }: { rating: number, size?: number }) =>
 };
 
 const SkeletonCard = () => (
-  <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] animate-pulse">
-    <div className="aspect-[4/3] bg-[#F5EBE0]" />
+  <div className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] dark:border-[#2D1F15] animate-pulse">
+    <div className="aspect-[4/3] bg-[#F5EBE0] dark:bg-[#2D1F15]" />
     <div className="p-4 space-y-3">
-      <div className="h-4 bg-[#F5EBE0] rounded w-3/4" />
-      <div className="h-3 bg-[#F5EBE0] rounded w-full" />
-      <div className="h-3 bg-[#F5EBE0] rounded w-5/6" />
+      <div className="h-4 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-3/4" />
+      <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-full" />
+      <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-5/6" />
     </div>
   </div>
 );
@@ -260,8 +262,24 @@ export default function App() {
   const [showGoToTop, setShowGoToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') as 'light' | 'dark' || 'light';
+    }
+    return 'light';
+  });
 
   const t = TRANSLATIONS[lang];
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     // Initial load and filter changes simulation
@@ -318,24 +336,24 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FDFBF7] text-[#4A3728] font-sans selection:bg-[#D4A373] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#FDFBF7] dark:bg-[#120C08] text-[#4A3728] dark:text-[#E6D5C3] font-sans selection:bg-[#D4A373] selection:text-white transition-colors duration-300">
       
       {/* --- Navbar --- */}
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E6D5C3] px-4 py-3 flex items-center justify-between shadow-sm"
+        className="sticky top-0 z-50 bg-white/80 dark:bg-[#1A1108]/80 backdrop-blur-md border-b border-[#E6D5C3] dark:border-[#2D1F15] px-4 py-3 flex items-center justify-between shadow-sm transition-colors duration-300"
       >
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 hover:bg-[#F5EBE0] rounded-full transition-colors"
+            className="p-2 hover:bg-[#F5EBE0] dark:hover:bg-[#2D1F15] rounded-full transition-colors text-[#4A3728] dark:text-[#E6D5C3]"
             id="sidebar-toggle"
           >
             <MenuIcon size={24} />
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-[#6F4E37] hidden sm:block overflow-hidden">
+          <h1 className="text-xl font-bold tracking-tight text-[#6F4E37] dark:text-[#D4A373] hidden sm:block overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
                 key={lang}
@@ -358,17 +376,27 @@ export default function App() {
             placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[#F5EBE0]/50 border border-transparent focus:border-[#D4A373] focus:bg-white rounded-full outline-none transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-[#F5EBE0]/50 dark:bg-[#2D1F15]/50 border border-transparent focus:border-[#D4A373] focus:bg-white dark:focus:bg-[#2D1F15] rounded-full outline-none transition-all text-sm dark:text-white dark:placeholder-[#A68A64]/70"
           />
         </div>
 
-        <button 
-          onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#6F4E37] text-white rounded-full text-xs font-medium hover:bg-[#5D4037] transition-colors"
-        >
-          <Globe size={14} />
-          {lang === 'en' ? 'አማርኛ' : 'English'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className="p-2 text-[#6F4E37] dark:text-[#D4A373] hover:bg-[#F5EBE0] dark:hover:bg-[#2D1F15] rounded-full transition-colors"
+            title="Toggle theme"
+          >
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+
+          <button 
+            onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
+            className="flex items-center gap-2 px-3 py-1.5 bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] rounded-full text-xs font-bold hover:opacity-90 transition-all"
+          >
+            <Globe size={14} />
+            {lang === 'en' ? 'አማርኛ' : 'English'}
+          </button>
+        </div>
       </motion.header>
 
       {/* --- Sidebar --- */}
@@ -387,13 +415,13 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-72 bg-[#FDFBF7] z-[70] shadow-2xl p-6 flex flex-col"
+              className="fixed top-0 left-0 h-full w-72 bg-[#FDFBF7] dark:bg-[#1A1108] z-[70] shadow-2xl p-6 flex flex-col border-r dark:border-[#2D1F15]"
             >
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-bold text-[#6F4E37]">{t.sidebarTitle}</h2>
+                <h2 className="text-lg font-bold text-[#6F4E37] dark:text-[#D4A373]">{t.sidebarTitle}</h2>
                 <button 
                   onClick={() => setIsSidebarOpen(false)}
-                  className="p-2 hover:bg-[#F5EBE0] rounded-full transition-colors"
+                  className="p-2 hover:bg-[#F5EBE0] dark:hover:bg-[#2D1F15] rounded-full transition-colors text-[#4A3728] dark:text-[#E6D5C3]"
                 >
                   <X size={20} />
                 </button>
@@ -415,7 +443,7 @@ export default function App() {
                     key={item.id}
                     variants={itemVariants}
                     onClick={() => scrollToSection(item.id)}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5EBE0] text-[#4A3728] font-medium transition-all group"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-[#F5EBE0] dark:hover:bg-[#2D1F15] text-[#4A3728] dark:text-[#E6D5C3] font-medium transition-all group"
                   >
                     <item.icon size={20} className="text-[#D4A373] group-hover:scale-110 transition-transform" />
                     {item.label}
@@ -424,16 +452,16 @@ export default function App() {
                 ))}
               </motion.nav>
 
-              <div className="pt-6 border-t border-[#E6D5C3]">
+              <div className="pt-6 border-t border-[#E6D5C3] dark:border-[#2D1F15]">
                 <p className="text-xs font-bold uppercase tracking-widest text-[#A68A64] mb-4">{t.socials}</p>
                 <div className="flex gap-4">
-                  <a href="#" className="p-2 bg-[#F5EBE0] rounded-lg text-[#6F4E37] hover:bg-[#D4A373] hover:text-white transition-all">
+                  <a href="#" className="p-2 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded-lg text-[#6F4E37] dark:text-[#D4A373] hover:bg-[#D4A373] dark:hover:bg-[#6F4E37] hover:text-white transition-all">
                     <Instagram size={20} />
                   </a>
-                  <a href="#" className="p-2 bg-[#F5EBE0] rounded-lg text-[#6F4E37] hover:bg-[#D4A373] hover:text-white transition-all">
+                  <a href="#" className="p-2 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded-lg text-[#6F4E37] dark:text-[#D4A373] hover:bg-[#D4A373] dark:hover:bg-[#6F4E37] hover:text-white transition-all">
                     <Send size={20} />
                   </a>
-                  <a href="#" className="p-2 bg-[#F5EBE0] rounded-lg text-[#6F4E37] hover:bg-[#D4A373] hover:text-white transition-all">
+                  <a href="#" className="p-2 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded-lg text-[#6F4E37] dark:text-[#D4A373] hover:bg-[#D4A373] dark:hover:bg-[#6F4E37] hover:text-white transition-all">
                     <MessageCircle size={20} />
                   </a>
                 </div>
@@ -459,11 +487,11 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto relative"
+                className="bg-white dark:bg-[#1A1108] w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl pointer-events-auto relative border dark:border-[#2D1F15]"
               >
                 <button 
                   onClick={() => setSelectedItem(null)}
-                  className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-md hover:bg-white rounded-full text-[#6F4E37] shadow-lg transition-all"
+                  className="absolute top-4 right-4 z-10 p-2 bg-white/80 dark:bg-[#1A1108]/80 backdrop-blur-md hover:bg-white dark:hover:bg-[#2D1F15] rounded-full text-[#6F4E37] dark:text-[#D4A373] shadow-lg transition-all"
                 >
                   <X size={20} />
                 </button>
@@ -490,9 +518,9 @@ export default function App() {
                         {selectedItem.category === 'food' && <Utensils size={14} />}
                         {t[selectedItem.category]}
                       </div>
-                      <h2 className="text-2xl font-bold text-[#4A3728]">{selectedItem.name[lang]}</h2>
+                      <h2 className="text-2xl font-bold text-[#4A3728] dark:text-white">{selectedItem.name[lang]}</h2>
                     </div>
-                    <div className="text-xl font-bold text-[#6F4E37] whitespace-nowrap">
+                    <div className="text-xl font-bold text-[#6F4E37] dark:text-[#D4A373] whitespace-nowrap">
                       {selectedItem.price} {t.priceSuffix}
                     </div>
                   </div>
@@ -504,7 +532,7 @@ export default function App() {
                   <div className="pt-4">
                     <button 
                       onClick={() => setSelectedItem(null)}
-                      className="w-full py-4 bg-[#6F4E37] text-white font-bold rounded-2xl hover:bg-[#5D4037] transition-all shadow-lg shadow-[#6F4E37]/20"
+                      className="w-full py-4 bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] font-bold rounded-2xl hover:bg-[#5D4037] dark:hover:opacity-90 transition-all shadow-lg shadow-[#6F4E37]/20"
                     >
                       Close
                     </button>
@@ -537,7 +565,7 @@ export default function App() {
                   exit={{ x: 20, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-3xl font-bold text-[#4A3728] mb-2">{t.menu}</h2>
+                  <h2 className="text-3xl font-bold text-[#4A3728] dark:text-[#E6D5C3] mb-2">{t.menu}</h2>
                   <p className="text-[#A68A64] max-w-md">{t.categories}</p>
                 </motion.div>
               </AnimatePresence>
@@ -556,8 +584,8 @@ export default function App() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                     activeCategory === cat.id 
-                    ? 'bg-[#6F4E37] text-white shadow-lg shadow-[#6F4E37]/20' 
-                    : 'bg-white border border-[#E6D5C3] text-[#A68A64] hover:border-[#D4A373] hover:text-[#D4A373]'
+                    ? 'bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] shadow-lg shadow-[#6F4E37]/20' 
+                    : 'bg-white dark:bg-[#1A1108] border border-[#E6D5C3] dark:border-[#2D1F15] text-[#A68A64] hover:border-[#D4A373] hover:text-[#D4A373]'
                   }`}
                 >
                   <cat.icon size={16} />
@@ -604,7 +632,7 @@ export default function App() {
                     variants={itemVariants}
                     whileHover={{ y: -5 }}
                     onClick={() => setSelectedItem(item)}
-                    className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] group cursor-pointer"
+                    className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-[#F5EBE0] dark:border-[#2D1F15] group cursor-pointer"
                   >
                     <div 
                       className="relative aspect-[4/3] overflow-hidden cursor-zoom-in"
@@ -633,7 +661,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="p-4 space-y-1">
-                      <h3 className="font-bold text-[#4A3728] group-hover:text-[#D4A373] transition-colors">
+                      <h3 className="font-bold text-[#4A3728] dark:text-[#E6D5C3] group-hover:text-[#D4A373] transition-colors">
                         {item.name[lang]}
                       </h3>
                       <p className="text-xs text-[#A68A64] line-clamp-2 leading-relaxed">
@@ -647,8 +675,8 @@ export default function App() {
           </motion.div>
 
           {!isLoading && filteredItems.length === 0 && (
-            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-[#E6D5C3]">
-              <Search size={48} className="mx-auto text-[#E6D5C3] mb-4" />
+            <div className="text-center py-20 bg-white dark:bg-[#1A1108] rounded-3xl border-2 border-dashed border-[#E6D5C3] dark:border-[#2D1F15]">
+              <Search size={48} className="mx-auto text-[#E6D5C3] dark:text-[#2D1F15] mb-4" />
               <p className="text-[#A68A64] font-medium">No items found matching your search.</p>
             </div>
           )}
@@ -657,7 +685,7 @@ export default function App() {
         {/* --- Reviews Section --- */}
         <motion.section 
           id="reviews" 
-          className="bg-[#F5EBE0]/30 rounded-[2.5rem] p-8 sm:p-12 space-y-8"
+          className="bg-[#F5EBE0]/30 dark:bg-[#1A1108]/50 rounded-[2.5rem] p-8 sm:p-12 space-y-8 transition-colors duration-300"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
@@ -672,7 +700,7 @@ export default function App() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
               >
-                <h2 className="text-3xl font-bold text-[#4A3728]">{t.reviews}</h2>
+                <h2 className="text-3xl font-bold text-[#4A3728] dark:text-[#E6D5C3]">{t.reviews}</h2>
               </motion.div>
             </AnimatePresence>
             <div className="flex justify-center mt-2">
@@ -688,10 +716,10 @@ export default function App() {
                 key={review.id} 
                 layout
                 variants={itemVariants}
-                className="bg-white p-6 rounded-2xl shadow-sm border border-[#E6D5C3] space-y-4"
+                className="bg-white dark:bg-[#1A1108] p-6 rounded-2xl shadow-sm border border-[#E6D5C3] dark:border-[#2D1F15] space-y-4 transition-colors duration-300"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-[#6F4E37]">{review.name}</span>
+                  <span className="font-bold text-sm text-[#6F4E37] dark:text-[#D4A373]">{review.name}</span>
                   <StarRating rating={review.rating} />
                 </div>
                 <AnimatePresence mode="wait">
@@ -701,7 +729,7 @@ export default function App() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="text-sm italic text-[#4A3728] leading-relaxed"
+                    className="text-sm italic text-[#4A3728] dark:text-[#E6D5C3] leading-relaxed"
                   >
                     "{review.comment[lang]}"
                   </motion.p>
@@ -719,8 +747,8 @@ export default function App() {
           viewport={{ once: true, margin: "-50px" }}
           variants={sectionVariants}
         >
-          <section id="feedback" className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#F5EBE0] space-y-6">
-            <h2 className="text-2xl font-bold text-[#4A3728] flex items-center gap-3">
+          <section id="feedback" className="bg-white dark:bg-[#1A1108] p-8 rounded-[2rem] shadow-sm border border-[#F5EBE0] dark:border-[#2D1F15] space-y-6 transition-colors duration-300">
+            <h2 className="text-2xl font-bold text-[#4A3728] dark:text-[#E6D5C3] flex items-center gap-3">
               <MessageSquare className="text-[#D4A373]" />
               {t.feedback}
             </h2>
@@ -732,7 +760,7 @@ export default function App() {
                   required
                   value={feedbackName}
                   onChange={(e) => setFeedbackName(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#FDFBF7] border border-[#E6D5C3] rounded-xl outline-none focus:border-[#D4A373] transition-all"
+                  className="w-full px-4 py-3 bg-[#FDFBF7] dark:bg-[#120C08] border border-[#E6D5C3] dark:border-[#2D1F15] rounded-xl outline-none focus:border-[#D4A373] transition-all dark:text-white"
                 />
               </div>
               <div className="space-y-1.5">
@@ -742,7 +770,7 @@ export default function App() {
                   rows={4}
                   value={feedbackMsg}
                   onChange={(e) => setFeedbackMsg(e.target.value)}
-                  className="w-full px-4 py-3 bg-[#FDFBF7] border border-[#E6D5C3] rounded-xl outline-none focus:border-[#D4A373] transition-all resize-none"
+                  className="w-full px-4 py-3 bg-[#FDFBF7] dark:bg-[#120C08] border border-[#E6D5C3] dark:border-[#2D1F15] rounded-xl outline-none focus:border-[#D4A373] transition-all resize-none dark:text-white"
                 />
               </div>
               <motion.button 
@@ -752,7 +780,7 @@ export default function App() {
                 className={`w-full py-4 font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
                   showFeedbackSuccess 
                   ? 'bg-green-600 text-white shadow-green-600/20' 
-                  : 'bg-[#6F4E37] text-white hover:bg-[#5D4037] shadow-[#6F4E37]/20'
+                  : 'bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] hover:bg-[#5D4037] dark:hover:opacity-90 shadow-[#6F4E37]/20 transition-all duration-300'
                 }`}
               >
                 <AnimatePresence mode="wait">
@@ -782,7 +810,7 @@ export default function App() {
             </form>
           </section>
 
-          <section id="contact" className="bg-[#6F4E37] p-8 rounded-[2rem] text-white space-y-8 shadow-xl">
+          <section id="contact" className="bg-[#6F4E37] dark:bg-[#1A1108] p-8 rounded-[2rem] text-white space-y-8 shadow-xl border dark:border-[#2D1F15] transition-colors duration-300">
             <h2 className="text-2xl font-bold flex items-center gap-3">
               <Phone className="text-[#D4A373]" />
               {t.contactUs}
@@ -803,7 +831,7 @@ export default function App() {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#A68A64] mb-1">Phone</p>
-                  <p className="font-medium">+251 911 123 456</p>
+                  <p className="font-medium text-[#D4A373]">+251 911 123 456</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -812,12 +840,12 @@ export default function App() {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#A68A64] mb-1">Email</p>
-                  <p className="font-medium">hello@abyssinia.cafe</p>
+                  <p className="font-medium text-[#D4A373]">hello@abyssinia.cafe</p>
                 </div>
               </div>
             </div>
             <div className="pt-4">
-              <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
+              <div className="bg-white/5 dark:bg-[#120C08]/50 p-6 rounded-2xl border border-white/10 dark:border-[#2D1F15]">
                 <p className="text-sm italic opacity-80">"Experience the true essence of Ethiopian hospitality in every cup."</p>
               </div>
             </div>
@@ -827,7 +855,7 @@ export default function App() {
 
       {/* --- Footer --- */}
       <motion.footer 
-        className="bg-white border-t border-[#E6D5C3] mt-20 py-12"
+        className="bg-white dark:bg-[#1A1108] border-t border-[#E6D5C3] dark:border-[#2D1F15] mt-20 py-12 transition-colors duration-300"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1 }}
@@ -835,7 +863,7 @@ export default function App() {
       >
         <div className="max-w-7xl mx-auto px-4 grid sm:grid-cols-3 gap-8 items-center text-center sm:text-left">
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-[#6F4E37]">{t.cafeName}</h3>
+            <h3 className="text-xl font-bold text-[#6F4E37] dark:text-[#D4A373]">{t.cafeName}</h3>
             <p className="text-sm text-[#A68A64]">
               © {new Date().getFullYear()} {t.cafeName}. {t.rights}
             </p>
@@ -849,7 +877,7 @@ export default function App() {
 
           <div className="sm:text-right space-y-1">
             <p className="text-xs font-bold uppercase tracking-widest text-[#A68A64]">Order Now</p>
-            <p className="text-lg font-bold text-[#6F4E37]">+251 911 123 456</p>
+            <p className="text-lg font-bold text-[#6F4E37] dark:text-[#D4A373]">+251 911 123 456</p>
           </div>
         </div>
       </motion.footer>
@@ -862,7 +890,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-24 right-8 z-[100] p-4 bg-[#6F4E37] text-white rounded-full shadow-2xl hover:bg-[#5D4037] active:scale-90 transition-all group"
+            className="fixed bottom-24 right-8 z-[100] p-4 bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] rounded-full shadow-2xl hover:bg-[#5D4037] dark:hover:opacity-90 active:scale-90 transition-all group"
             aria-label="Go to top"
           >
             <ChevronUp size={24} className="group-hover:-translate-y-1 transition-transform" />
