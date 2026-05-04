@@ -24,7 +24,8 @@ import {
   Check,
   Sun,
   Moon,
-  MessageCircle
+  MessageCircle,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import QuickPinchZoom, { make3dTransformValue } from 'react-quick-pinch-zoom';
@@ -196,6 +197,8 @@ const TRANSLATIONS = {
     sidebarTitle: "Navigation",
     socials: "Follow Us",
     feedbackSuccess: "Thank you for your feedback!",
+    favorites: "Favorites",
+    noFavorites: "You haven't added any favorites yet.",
   },
   am: {
     cafeName: "አቢሲኒያ ፕሪሚየም",
@@ -218,6 +221,8 @@ const TRANSLATIONS = {
     sidebarTitle: "አሰሳ",
     socials: "ይከተሉን",
     feedbackSuccess: "ለአስተያየትዎ እናመሰግናለን!",
+    favorites: "ተወዳጆች",
+    noFavorites: "ምንም ተወዳጅ ምግብ አልመረጡም።",
   }
 };
 
@@ -262,6 +267,13 @@ export default function App() {
   const [showGoToTop, setShowGoToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<number[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('favorites');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') as 'light' | 'dark' || 'light';
@@ -280,6 +292,10 @@ export default function App() {
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
   useEffect(() => {
     // Initial load and filter changes simulation
@@ -312,10 +328,22 @@ export default function App() {
       const matchesSearch = 
         item.name[lang].toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.price.toString().includes(searchQuery);
-      const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
+      
+      let matchesCategory = activeCategory === 'all' || item.category === activeCategory;
+      if (activeCategory === 'favorites') {
+        matchesCategory = favorites.includes(item.id);
+      }
+      
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeCategory, lang]);
+  }, [searchQuery, activeCategory, lang, favorites]);
+
+  const toggleFavorite = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setFavorites(prev => 
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    );
+  };
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -495,6 +523,16 @@ export default function App() {
                 >
                   <X size={20} />
                 </button>
+                <button 
+                  onClick={(e) => toggleFavorite(e, selectedItem.id)}
+                  className={`absolute top-4 left-4 z-10 p-2 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 ${
+                    favorites.includes(selectedItem.id)
+                    ? 'bg-[#D4A373] text-white'
+                    : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
+                  }`}
+                >
+                  <Heart size={20} fill={favorites.includes(selectedItem.id) ? "currentColor" : "none"} />
+                </button>
 
                 <div className="aspect-video overflow-hidden cursor-zoom-in group">
                   <img 
@@ -576,6 +614,7 @@ export default function App() {
                 { id: 'coffee', label: t.coffee, icon: Coffee },
                 { id: 'juice', label: t.juice, icon: GlassWater },
                 { id: 'food', label: t.food, icon: Utensils },
+                { id: 'favorites', label: t.favorites, icon: Heart },
               ].map((cat) => (
                 <motion.button
                   key={cat.id}
@@ -652,6 +691,17 @@ export default function App() {
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+                      {/* Favorite Button */}
+                      <button
+                        onClick={(e) => toggleFavorite(e, item.id)}
+                        className={`absolute top-3 left-3 z-10 p-2 rounded-full backdrop-blur-md transition-all duration-300 ${
+                          favorites.includes(item.id)
+                          ? 'bg-[#D4A373] text-white shadow-lg'
+                          : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
+                        }`}
+                      >
+                        <Heart size={16} fill={favorites.includes(item.id) ? "currentColor" : "none"} />
+                      </button>
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-[#6F4E37]/80 backdrop-blur-sm flex flex-col justify-center p-6 text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                         <p className="text-xs sm:text-sm font-medium leading-relaxed mb-2 line-clamp-4">
@@ -681,8 +731,14 @@ export default function App() {
 
           {!isLoading && filteredItems.length === 0 && (
             <div className="text-center py-20 bg-white dark:bg-[#1A1108] rounded-3xl border-2 border-dashed border-[#E6D5C3] dark:border-[#2D1F15]">
-              <Search size={48} className="mx-auto text-[#E6D5C3] dark:text-[#2D1F15] mb-4" />
-              <p className="text-[#A68A64] font-medium">No items found matching your search.</p>
+              {activeCategory === 'favorites' ? (
+                <Heart size={48} className="mx-auto text-[#E6D5C3] dark:text-[#2D1F15] mb-4" />
+              ) : (
+                <Search size={48} className="mx-auto text-[#E6D5C3] dark:text-[#2D1F15] mb-4" />
+              )}
+              <p className="text-[#A68A64] font-medium">
+                {activeCategory === 'favorites' ? t.noFavorites : "No items found matching your search."}
+              </p>
             </div>
           )}
         </motion.section>
