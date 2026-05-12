@@ -672,9 +672,14 @@ export default function App() {
                     whileHover={{ 
                       y: -8, 
                       scale: 1.02,
-                      boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                      boxShadow: "0 20px 40px -15px rgba(111, 78, 55, 0.3), 0 10px 20px -10px rgba(0, 0, 0, 0.2)"
                     }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 400, 
+                      damping: 17
+                    }}
                     onClick={() => setSelectedItem(item)}
                     className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md transition-all border border-[#F5EBE0] dark:border-[#2D1F15] group cursor-pointer"
                   >
