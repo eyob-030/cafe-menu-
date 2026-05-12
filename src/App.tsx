@@ -25,7 +25,8 @@ import {
   Sun,
   Moon,
   MessageCircle,
-  Heart
+  Heart,
+  Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import QuickPinchZoom, { make3dTransformValue } from 'react-quick-pinch-zoom';
@@ -199,6 +200,8 @@ const TRANSLATIONS = {
     feedbackSuccess: "Thank you for your feedback!",
     favorites: "Favorites",
     noFavorites: "You haven't added any favorites yet.",
+    share: "Share",
+    linkCopied: "Link copied to clipboard!",
   },
   am: {
     cafeName: "አቢሲኒያ ፕሪሚየም",
@@ -223,6 +226,8 @@ const TRANSLATIONS = {
     feedbackSuccess: "ለአስተያየትዎ እናመሰግናለን!",
     favorites: "ተወዳጆች",
     noFavorites: "ምንም ተወዳጅ ምግብ አልመረጡም።",
+    share: "ያጋሩ",
+    linkCopied: "ሊንኩ ተገልብጧል!",
   }
 };
 
@@ -267,6 +272,7 @@ export default function App() {
   const [showGoToTop, setShowGoToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [shareToast, setShareToast] = useState(false);
   const [favorites, setFavorites] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('favorites');
@@ -343,6 +349,31 @@ export default function App() {
     setFavorites(prev => 
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
     );
+  };
+
+  const handleShare = async (e: React.MouseEvent, item: MenuItem) => {
+    e.stopPropagation();
+    const shareData = {
+      title: item.name[lang],
+      text: `${item.name[lang]} - ${item.description[lang]}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setShareToast(true);
+        setTimeout(() => setShareToast(false), 3000);
+      } catch (err) {
+        console.error("Error copying to clipboard:", err);
+      }
+    }
   };
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
@@ -523,16 +554,24 @@ export default function App() {
                 >
                   <X size={20} />
                 </button>
-                <button 
-                  onClick={(e) => toggleFavorite(e, selectedItem.id)}
-                  className={`absolute top-4 left-4 z-10 p-2 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 ${
-                    favorites.includes(selectedItem.id)
-                    ? 'bg-[#D4A373] text-white'
-                    : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
-                  }`}
-                >
-                  <Heart size={20} fill={favorites.includes(selectedItem.id) ? "currentColor" : "none"} />
-                </button>
+                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                  <button 
+                    onClick={(e) => toggleFavorite(e, selectedItem.id)}
+                    className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 ${
+                      favorites.includes(selectedItem.id)
+                      ? 'bg-[#D4A373] text-white'
+                      : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
+                    }`}
+                  >
+                    <Heart size={20} fill={favorites.includes(selectedItem.id) ? "currentColor" : "none"} />
+                  </button>
+                  <button 
+                    onClick={(e) => handleShare(e, selectedItem)}
+                    className="p-2 bg-white/80 dark:bg-[#1A1108]/80 backdrop-blur-md shadow-lg rounded-full text-[#6F4E37] dark:text-[#D4A373] hover:scale-110 transition-all"
+                  >
+                    <Share2 size={20} />
+                  </button>
+                </div>
 
                 <div className="aspect-video overflow-hidden cursor-zoom-in group">
                   <img 
@@ -696,17 +735,25 @@ export default function App() {
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      {/* Favorite Button */}
-                      <button
-                        onClick={(e) => toggleFavorite(e, item.id)}
-                        className={`absolute top-3 left-3 z-10 p-2 rounded-full backdrop-blur-md transition-all duration-300 ${
-                          favorites.includes(item.id)
-                          ? 'bg-[#D4A373] text-white shadow-lg'
-                          : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
-                        }`}
-                      >
-                        <Heart size={16} fill={favorites.includes(item.id) ? "currentColor" : "none"} />
-                      </button>
+                      {/* Action Buttons */}
+                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                        <button
+                          onClick={(e) => toggleFavorite(e, item.id)}
+                          className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-sm ${
+                            favorites.includes(item.id)
+                            ? 'bg-[#D4A373] text-white'
+                            : 'bg-white/80 dark:bg-[#1A1108]/80 text-[#6F4E37] dark:text-[#D4A373] hover:scale-110'
+                          }`}
+                        >
+                          <Heart size={16} fill={favorites.includes(item.id) ? "currentColor" : "none"} />
+                        </button>
+                        <button
+                          onClick={(e) => handleShare(e, item)}
+                          className="p-2 bg-white/80 dark:bg-[#1A1108]/80 backdrop-blur-md rounded-full text-[#6F4E37] dark:text-[#D4A373] hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                        >
+                          <Share2 size={16} />
+                        </button>
+                      </div>
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-[#6F4E37]/80 backdrop-blur-sm flex flex-col justify-center p-6 text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                         <p className="text-xs sm:text-sm font-medium leading-relaxed mb-2 line-clamp-4">
@@ -1034,6 +1081,21 @@ export default function App() {
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/60 text-sm font-medium whitespace-nowrap bg-white/5 px-6 py-2 rounded-full backdrop-blur-sm border border-white/10 pointer-events-none">
               Pinch to zoom • Drag to pan • Esc to close
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- Share Toast --- */}
+      <AnimatePresence>
+        {shareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 50, x: '-50%' }}
+            className="fixed bottom-12 left-1/2 z-[300] bg-[#6F4E37] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 font-medium"
+          >
+            <Check size={20} className="text-[#D4A373]" />
+            {t.linkCopied}
           </motion.div>
         )}
       </AnimatePresence>
