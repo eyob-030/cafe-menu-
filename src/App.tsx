@@ -26,7 +26,11 @@ import {
   Moon,
   MessageCircle,
   Heart,
-  Share2
+  Share2,
+  Twitter,
+  Facebook,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import QuickPinchZoom, { make3dTransformValue } from 'react-quick-pinch-zoom';
@@ -202,6 +206,8 @@ const TRANSLATIONS = {
     noFavorites: "You haven't added any favorites yet.",
     share: "Share",
     linkCopied: "Link copied to clipboard!",
+    shareVia: "Share via",
+    copyLink: "Copy Link",
   },
   am: {
     cafeName: "አቢሲኒያ ፕሪሚየም",
@@ -228,6 +234,8 @@ const TRANSLATIONS = {
     noFavorites: "ምንም ተወዳጅ ምግብ አልመረጡም።",
     share: "ያጋሩ",
     linkCopied: "ሊንኩ ተገልብጧል!",
+    shareVia: "በዚህ ያጋሩ",
+    copyLink: "ሊንኩን ቅዳ",
   }
 };
 
@@ -273,6 +281,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
+  const [activeShareItem, setActiveShareItem] = useState<MenuItem | null>(null);
   const [favorites, setFavorites] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('favorites');
@@ -353,26 +362,33 @@ export default function App() {
 
   const handleShare = async (e: React.MouseEvent, item: MenuItem) => {
     e.stopPropagation();
-    const shareData = {
-      title: item.name[lang],
-      text: `${item.name[lang]} - ${item.description[lang]}`,
-      url: window.location.href,
-    };
-
+    
     if (navigator.share) {
+      const shareData = {
+        title: item.name[lang],
+        text: `${item.name[lang]} - ${item.description[lang]}`,
+        url: window.location.href,
+      };
       try {
         await navigator.share(shareData);
       } catch (err) {
-        console.error("Error sharing:", err);
+        if ((err as Error).name !== 'AbortError') {
+          console.error("Error sharing:", err);
+          setActiveShareItem(item);
+        }
       }
     } else {
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        setShareToast(true);
-        setTimeout(() => setShareToast(false), 3000);
-      } catch (err) {
-        console.error("Error copying to clipboard:", err);
-      }
+      setActiveShareItem(item);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 3000);
+    } catch (err) {
+      console.error("Error copying to clipboard:", err);
     }
   };
 
@@ -1085,17 +1101,157 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* --- Share Sheet (Advanced UI) --- */}
+      <AnimatePresence>
+        {activeShareItem && (
+          <div className="fixed inset-0 z-[400] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveShareItem(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
+              className="relative w-full max-w-lg bg-white dark:bg-[#1A1108] rounded-t-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border-t sm:border dark:border-[#2D1F15] p-8 sm:p-10 space-y-8"
+            >
+              {/* Drag Handle for Mobile */}
+              <div className="w-12 h-1.5 bg-[#E6D5C3] dark:bg-[#2D1F15] rounded-full mx-auto -mt-2 mb-6 sm:hidden" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-[#6F4E37] dark:text-[#D4A373] tracking-tight">{t.share}</h3>
+                  <p className="text-sm text-[#A68A64] font-medium">{t.shareVia} social media</p>
+                </div>
+                <button 
+                  onClick={() => setActiveShareItem(null)}
+                  className="p-3 hover:bg-[#F5EBE0] dark:hover:bg-[#2D1F15] rounded-full transition-colors text-[#4A3728] dark:text-[#E6D5C3]"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Item Preview Card */}
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-5 bg-[#FDFBF7] dark:bg-[#120C08] p-5 rounded-3xl border border-[#F5EBE0] dark:border-[#2D1F15] shadow-sm relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A373]/5 rounded-full -mr-16 -mt-16 blur-2xl transition-all group-hover:bg-[#D4A373]/10" />
+                <div className="relative">
+                  <img 
+                    src={activeShareItem.image} 
+                    alt={activeShareItem.name[lang]} 
+                    className="w-20 h-20 rounded-2xl object-cover shadow-md transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute -bottom-2 -right-2 bg-[#6F4E37] text-white p-1.5 rounded-lg">
+                    <Share2 size={12} />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-black text-[#4A3728] dark:text-[#E6D5C3] truncate">{activeShareItem.name[lang]}</p>
+                  <p className="text-xs text-[#A68A64] font-medium uppercase tracking-widest">{activeShareItem.category}</p>
+                  <p className="text-sm text-[#6F4E37] dark:text-[#A68A64] line-clamp-1 mt-1 font-medium">{activeShareItem.description[lang]}</p>
+                </div>
+              </motion.div>
+
+              {/* Share Options Grid */}
+              <div className="grid grid-cols-4 gap-4 sm:gap-6">
+                {[
+                  { id: 'WhatsApp', icon: MessageCircle, color: 'bg-[#25D366]/10 text-[#25D366]', url: `https://wa.me/?text=${encodeURIComponent(activeShareItem.name[lang] + ' ' + window.location.href)}` },
+                  { id: 'X (Twitter)', icon: Twitter, color: 'bg-black/10 dark:bg-white/10 text-black dark:text-white', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(activeShareItem.name[lang])}&url=${encodeURIComponent(window.location.href)}` },
+                  { id: 'Facebook', icon: Facebook, color: 'bg-[#1877F2]/10 text-[#1877F2]', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` },
+                  { id: 'Browser', icon: ExternalLink, color: 'bg-[#FF4500]/10 text-[#FF4500]', url: window.location.href },
+                ].map((option, idx) => (
+                  <motion.a
+                    key={option.id}
+                    href={option.id === 'Browser' ? undefined : option.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + idx * 0.05 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      if (option.id === 'Browser') {
+                        e.preventDefault();
+                        window.open(window.location.href, '_blank');
+                      }
+                    }}
+                    className="flex flex-col items-center gap-3 group"
+                  >
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-3xl ${option.color} transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:ring-4 group-hover:ring-current/10 bg-opacity-20`}>
+                      <option.icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-bold text-[#4A3728] dark:text-[#E6D5C3] text-center">{option.id}</span>
+                  </motion.a>
+                ))}
+              </div>
+
+              {/* Copy Link Section */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="space-y-3"
+              >
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-[#A68A64]">{t.copyLink}</p>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#A68A64]">
+                    <Copy size={16} />
+                  </div>
+                  <input 
+                    readOnly 
+                    value={window.location.href}
+                    className="w-full pl-12 pr-12 py-4 bg-[#F5EBE0]/20 dark:bg-[#120C08] border-2 border-[#F5EBE0] dark:border-[#2D1F15] rounded-3xl text-sm font-bold text-[#6F4E37] dark:text-[#A68A64] outline-none transition-all focus:border-[#D4A373]"
+                  />
+                  <button 
+                    onClick={() => {
+                      copyToClipboard(window.location.href);
+                      setActiveShareItem(null);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-[#6F4E37] hover:bg-[#4A3728] text-white rounded-2xl font-bold text-xs transition-all shadow-lg active:scale-95"
+                  >
+                    {lang === 'en' ? 'COPY' : 'ቅዳ'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* --- Share Toast --- */}
       <AnimatePresence>
         {shareToast && (
           <motion.div
-            initial={{ opacity: 0, y: 50, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 50, x: '-50%' }}
-            className="fixed bottom-12 left-1/2 z-[300] bg-[#6F4E37] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 font-medium"
+            initial={{ opacity: 0, scale: 0.8, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.8, y: 50, x: '-50%' }}
+            className="fixed bottom-12 left-1/2 z-[500] bg-[#6F4E37] dark:bg-[#D4A373] text-white dark:text-[#120C08] px-6 py-4 rounded-[2rem] shadow-2xl flex items-center gap-4 font-bold min-w-[280px] border border-white/10"
           >
-            <Check size={20} className="text-[#D4A373]" />
-            {t.linkCopied}
+            <div className="p-2 bg-white/20 rounded-full">
+              <Check size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm">{t.linkCopied}</p>
+              <motion.div 
+                className="h-1 bg-white/30 rounded-full mt-2 overflow-hidden"
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 3, ease: "linear" }}
+              >
+                <div className="h-full bg-white w-full" />
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
