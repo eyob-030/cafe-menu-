@@ -570,7 +570,7 @@ export default function App() {
                 >
                   <X size={20} />
                 </button>
-                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
                   <button 
                     onClick={(e) => toggleFavorite(e, selectedItem.id)}
                     className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 ${
@@ -752,7 +752,7 @@ export default function App() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       {/* Action Buttons */}
-                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                      <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                         <button
                           onClick={(e) => toggleFavorite(e, item.id)}
                           className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 shadow-sm ${
