@@ -66,15 +66,24 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { y: 30, opacity: 0 },
+  hidden: { y: 20, opacity: 0, scale: 0.95 },
   visible: {
     y: 0,
     opacity: 1,
+    scale: 1,
     transition: {
       type: "spring",
-      stiffness: 80,
-      damping: 12
+      stiffness: 400,
+      damping: 30
     }
+  },
+  exit: { 
+    opacity: 0, 
+    scale: 0.95,
+    y: 10,
+    transition: { 
+      duration: 0.2 
+    } 
   }
 };
 
@@ -744,6 +753,9 @@ export default function App() {
                   <motion.div
                     key={item.id}
                     layout
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
                     variants={itemVariants}
                     whileHover={{ 
                       y: -8, 
