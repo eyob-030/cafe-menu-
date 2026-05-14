@@ -258,12 +258,33 @@ const StarRating = ({ rating, size = 12 }: { rating: number, size?: number }) =>
 };
 
 const SkeletonCard = () => (
-  <div className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] dark:border-[#2D1F15] animate-pulse">
-    <div className="aspect-[4/3] bg-[#F5EBE0] dark:bg-[#2D1F15]" />
+  <div className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] dark:border-[#2D1F15] relative group">
+    {/* Shimmer Effect */}
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      <motion.div 
+        initial={{ x: '-100%' }}
+        animate={{ x: '100%' }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+        className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 dark:via-[#D4A373]/5 to-transparent -skew-x-12"
+      />
+    </div>
+
+    <div className="relative aspect-[4/3] bg-[#F5EBE0] dark:bg-[#2D1F15]/50 overflow-hidden">
+      {/* Mocking action buttons */}
+      <div className="absolute top-3 left-3 flex gap-2">
+        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-white/5" />
+        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-white/5" />
+      </div>
+      {/* Mocking price badge */}
+      <div className="absolute top-3 right-3 w-16 h-6 rounded-full bg-white/50 dark:bg-white/5" />
+    </div>
+
     <div className="p-4 space-y-3">
-      <div className="h-4 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-3/4" />
-      <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-full" />
-      <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15] rounded w-5/6" />
+      <div className="h-5 bg-[#F5EBE0] dark:bg-[#2D1F15]/50 rounded-lg w-3/4" />
+      <div className="space-y-2">
+        <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15]/30 rounded-lg w-full" />
+        <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15]/30 rounded-lg w-5/6" />
+      </div>
     </div>
   </div>
 );
