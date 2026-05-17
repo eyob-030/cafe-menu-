@@ -312,6 +312,8 @@ export default function App() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [activeShareItem, setActiveShareItem] = useState<MenuItem | null>(null);
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [favorites, setFavorites] = useState<number[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('favorites');
@@ -358,10 +360,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const matches = MENU_DATA
+        .map(item => item.name[lang])
+        .filter(name => name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .slice(0, 5);
+      setSearchSuggestions([...new Set(matches)]);
+      setShowSuggestions(true);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery, lang]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setZoomedImage(null);
         setSelectedItem(null);
+        setShowSuggestions(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -474,15 +491,55 @@ export default function App() {
           </h1>
         </div>
 
-        <div className="flex-1 max-w-md mx-4 relative">
+        <div className="flex-1 max-w-md mx-4 relative group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A68A64]" size={18} />
           <input 
             type="text" 
             placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
             className="w-full pl-10 pr-4 py-2 bg-[#F5EBE0]/50 dark:bg-[#2D1F15]/50 border border-transparent focus:border-[#D4A373] focus:bg-white dark:focus:bg-[#2D1F15] rounded-full outline-none transition-all text-sm dark:text-white dark:placeholder-[#A68A64]/70"
           />
+          
+          <AnimatePresence>
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[-1]" 
+                  onClick={() => setShowSuggestions(false)} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1A1108] border border-[#E6D5C3] dark:border-[#2D1F15] rounded-2xl shadow-2xl overflow-hidden z-[100]"
+                >
+                  <div className="p-2 space-y-1">
+                    {searchSuggestions.map((suggestion, idx) => (
+                      <motion.button
+                        key={suggestion}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => {
+                          setSearchQuery(suggestion);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FDFBF7] dark:hover:bg-[#2D1F15] text-left transition-colors group/item"
+                      >
+                        <Search size={14} className="text-[#A68A64] group-hover/item:text-[#D4A373] transition-colors" />
+                        <span className="text-sm font-medium text-[#4A3728] dark:text-[#E6D5C3] group-hover/item:text-[#6F4E37] dark:group-hover/item:text-[#D4A373]">
+                          {suggestion}
+                        </span>
+                        <ChevronRight size={14} className="ml-auto text-[#E6D5C3] dark:text-[#2D1F15] opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="flex items-center gap-2">
