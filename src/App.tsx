@@ -267,32 +267,45 @@ const StarRating = ({ rating, size = 12 }: { rating: number, size?: number }) =>
 };
 
 const SkeletonCard = () => (
-  <div className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] dark:border-[#2D1F15] relative group">
-    {/* Shimmer Effect */}
-    <div className="absolute inset-0 z-10 pointer-events-none">
+  <div className="bg-white dark:bg-[#1A1108] rounded-2xl overflow-hidden shadow-md border border-[#F5EBE0] dark:border-[#2D1F15] relative">
+    {/* Enhanced Shimmer Effect */}
+    <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
       <motion.div 
-        initial={{ x: '-100%' }}
-        animate={{ x: '100%' }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-        className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 dark:via-[#D4A373]/5 to-transparent -skew-x-12"
+        initial={{ x: "-150%" }}
+        animate={{ x: "150%" }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="h-full w-full bg-gradient-to-r from-transparent via-[#D4A373]/10 dark:via-[#D4A373]/5 to-transparent -skew-x-12"
       />
     </div>
 
-    <div className="relative aspect-[4/3] bg-[#F5EBE0] dark:bg-[#2D1F15]/50 overflow-hidden">
-      {/* Mocking action buttons */}
+    <div className="relative aspect-[4/3] bg-[#F5EBE0]/60 dark:bg-[#2D1F15]/40 overflow-hidden">
+      {/* Mocking action buttons at top-left */}
       <div className="absolute top-3 left-3 flex gap-2">
-        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-white/5" />
-        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-white/5" />
+        <div className="w-8 h-8 rounded-full bg-[#E6D5C3] dark:bg-[#2D1F15] opacity-50" />
       </div>
-      {/* Mocking price badge */}
-      <div className="absolute top-3 right-3 w-16 h-6 rounded-full bg-white/50 dark:bg-white/5" />
+      {/* Mocking price badge at top-right */}
+      <div className="absolute top-3 right-3 w-14 h-6 rounded-full bg-[#E6D5C3] dark:bg-[#2D1F15] opacity-50" />
+      
+      {/* Middle icon placeholder */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-10">
+        <Coffee size={48} className="text-[#6F4E37] dark:text-[#D4A373]" />
+      </div>
     </div>
 
-    <div className="p-4 space-y-3">
-      <div className="h-5 bg-[#F5EBE0] dark:bg-[#2D1F15]/50 rounded-lg w-3/4" />
+    <div className="p-4 space-y-4">
+      {/* Title placeholder */}
+      <div className="h-5 bg-[#F5EBE0] dark:bg-[#2D1F15]/60 rounded-full w-3/4" />
+      
+      {/* Description lines placeholder */}
       <div className="space-y-2">
-        <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15]/30 rounded-lg w-full" />
-        <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15]/30 rounded-lg w-5/6" />
+        <div className="h-2.5 bg-[#F5EBE0] dark:bg-[#2D1F15]/40 rounded-full w-full" />
+        <div className="h-2.5 bg-[#F5EBE0] dark:bg-[#2D1F15]/40 rounded-full w-4/5" />
+      </div>
+      
+      {/* Footer / Meta placeholder */}
+      <div className="flex justify-between items-center pt-2">
+        <div className="h-3 bg-[#F5EBE0] dark:bg-[#2D1F15]/30 rounded-full w-1/3" />
+        <div className="h-3 bg-[#D4A373]/20 dark:bg-[#D4A373]/10 rounded-full w-1/4" />
       </div>
     </div>
   </div>
